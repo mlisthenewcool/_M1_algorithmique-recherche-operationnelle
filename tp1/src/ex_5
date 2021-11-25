@@ -1,0 +1,103 @@
+################################################################################
+
+param cout_production1 := 240;
+param cout_production2 := 250;
+param cout_production3 := 265;
+param cout_production4 := 285;
+param cout_production5 := 280;
+param cout_production6 := 285;
+
+param demande1 := 1000;
+param demande2 := 4500;
+param demande3 := 6000;
+param demande4 := 5500;
+param demande5 := 3500;
+param demande6 := 4000;
+
+param capacite_production1 := 4000;
+param capacite_production2 := 3500;
+param capacite_production3 := 4000;
+param capacite_production4 := 4500;
+param capacite_production5 := 4000;
+param capacite_production6 := 3500;
+
+param cout_stockage := 0.015;
+param capacite_maximale_entrepot := 6000;
+param capacite_minimale_entrepot := 1500;
+param stock_ini := 2750;
+
+var production1;
+var production2;
+var production3;
+var production4;
+var production5;
+var production6;
+
+var stock1;
+var stock2;
+var stock3;
+var stock4;
+var stock5;
+var stock6;
+
+################################################################################
+
+# minimiser le coût total de production et de stockage
+
+minimize obj :
+	production1 * cout_production1 + stock1 * cout_stockage +
+	production2 * cout_production2 + stock2 * cout_stockage +
+	production3 * cout_production3 + stock3 * cout_stockage +
+	production4 * cout_production4 + stock4 * cout_stockage +
+	production5 * cout_production5 + stock5 * cout_stockage +
+	production6 * cout_production6 + stock6 * cout_stockage;
+
+################################################################################
+
+# à aucun moment l'entrepôt ne peut stocker plus que sa capacité maximale
+s.t. contrainte_stock_max_1 : stock1 <= capacite_maximale_entrepot;
+s.t. contrainte_stock_max_2 : stock2 <= capacite_maximale_entrepot;
+s.t. contrainte_stock_max_3 : stock3 <= capacite_maximale_entrepot;
+s.t. contrainte_stock_max_4 : stock4 <= capacite_maximale_entrepot;
+s.t. contrainte_stock_max_5 : stock5 <= capacite_maximale_entrepot;
+s.t. contrainte_stock_max_6 : stock6 <= capacite_maximale_entrepot;
+
+# à tout moment l'entrepôt doit avoir au moins un certain stock
+s.t. contrainte_stock_min_1 : stock1 >= capacite_minimale_entrepot;
+s.t. contrainte_stock_min_2 : stock2 >= capacite_minimale_entrepot;
+s.t. contrainte_stock_min_3 : stock3 >= capacite_minimale_entrepot;
+s.t. contrainte_stock_min_4 : stock4 >= capacite_minimale_entrepot;
+s.t. contrainte_stock_min_5 : stock5 >= capacite_minimale_entrepot;
+s.t. contrainte_stock_min_6 : stock6 >= capacite_minimale_entrepot;
+
+# l'entrepôt doit produire au moins la moitié de sa capacité de production
+s.t. contrainte_production_minimale_1 : production1 >= capacite_production1 / 2;
+s.t. contrainte_production_minimale_2 : production2 >= capacite_production2 / 2;
+s.t. contrainte_production_minimale_3 : production3 >= capacite_production3 / 2;
+s.t. contrainte_production_minimale_4 : production4 >= capacite_production4 / 2;
+s.t. contrainte_production_minimale_5 : production5 >= capacite_production5 / 2;
+s.t. contrainte_production_minimale_6 : production6 >= capacite_production6 / 2;
+
+# le total du stock et de la production doit être supérieur ou égal à la demande
+s.t. contrainte_demande_satisfaite_1 : production1 + stock1 >= demande1;
+s.t. contrainte_demande_satisfaite_2 : production2 + stock2 >= demande2;
+s.t. contrainte_demande_satisfaite_3 : production3 + stock3 >= demande3;
+s.t. contrainte_demande_satisfaite_4 : production4 + stock4 >= demande4;
+s.t. contrainte_demande_satisfaite_5 : production5 + stock5 >= demande5;
+s.t. contrainte_demande_satisfaite_6 : production6 + stock6 >= demande6;
+
+# stock(i) = stock(i-1) + production(i) - demande(i)
+s.t. contrainte_egalite_stock_1 : stock1 = stock_ini + production1 - demande1;
+s.t. contrainte_egalite_stock_2 : stock2 = stock1    + production2 - demande2;
+s.t. contrainte_egalite_stock_3 : stock3 = stock2    + production3 - demande3;
+s.t. contrainte_egalite_stock_4 : stock4 = stock3    + production4 - demande4;
+s.t. contrainte_egalite_stock_5 : stock5 = stock4    + production5 - demande5;
+s.t. contrainte_egalite_stock_6 : stock6 = stock5    + production6 - demande6;
+
+################################################################################
+
+solve;
+display : 
+	production1, production2, production3, production4, production5, production6,
+	stock1, stock2, stock3, stock4, stock5, stock6;
+end;

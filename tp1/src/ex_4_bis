@@ -1,0 +1,59 @@
+################################################################################
+
+set MELANGES;
+set INGREDIENTS;
+
+# coût (euros/kg) des mélanges
+param COUTS{i in MELANGES};
+
+# quantité des ingrédients dans chaque mélange
+param COMPOSITION{i in MELANGES, j in INGREDIENTS};
+
+# composition requise pour la commande
+param COMPOSITION_COMMANDE{i in INGREDIENTS};
+
+# quantité (en kg) de la commande
+param TOTAL_COMMANDE;
+
+# quantités des mélanges pour réaliser la commande
+var QUANTITES{i in MELANGES} >= 0;
+
+################################################################################
+
+minimize obj : sum{i in MELANGES, j in INGREDIENTS} COMPOSITION[i,j] * COUTS[i];
+
+################################################################################
+
+# on doit produire au moins TOTAL_COMMANDE kilogrammes
+s.t. c1 : sum{i in MELANGES} QUANTITES[i]  >= TOTAL_COMMANDE;
+
+# le mélange final doit respecter la composition de la commande
+s.t. c2 {i in INGREDIENTS} : sum{j in MELANGES} QUANTITES[j] * COMPOSITION[j,i] >= TOTAL_COMMANDE * COMPOSITION_COMMANDE[i];
+
+################################################################################
+
+solve;
+display {i in MELANGES, j in INGREDIENTS} COMPOSITION[i, j];
+
+################################################################################
+
+data;
+param TOTAL_COMMANDE := 4000;
+set MELANGES := M1 M2 M3 M4;
+set INGREDIENTS := MAIS GRAINES MINERAUX;
+param COUTS :=
+	M1 0.50
+	M2 0.60
+	M3 0.64
+	M4 0.30;
+param COMPOSITION :
+				M1		M2		M3		M4		:=
+	MAIS		0.30	0.05	0.20	0.10
+	GRAINES		0.10	0.30	0.15	0.10
+	MINERAUX	0.20	0.15	0.20	0.30;
+param COMPOSITION_COMMANDE :=
+	MAIS 		0.20
+	GRAINES		0.15
+	MINERAUX	0.25;
+
+end;

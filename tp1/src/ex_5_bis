@@ -1,0 +1,66 @@
+################################################################################
+
+set PERIODE;						### période concernée
+
+param COUT{i in PERIODE};			### coût de production
+param DEMANDE{i in PERIODE};		### demande à satisfaire
+param CAPACITE{i in PERIODE};		### capacité de production
+
+var PRODUCTION{i in PERIODE} >= 0;	### production d'unités, toujours positive
+var STOCK{i in PERIODE} >= 0;		### stock d'unités
+
+################################################################################
+
+# minimiser le coût total de production et de stockage
+minimize obj{i in PERIODE}: PRODUCTION[i] * COUT[i] + 0.015 * STOCK[i];
+
+################################################################################
+
+# à aucun moment l'entrepôt ne peut stocker plus de 6000 unités
+s.t. contrainte_stock_max{i in PERIODE}: STOCK[i] <= 6000;
+
+# à tout moment l'entrepôt doit avoir au moins 1500 unités en stock
+s.t. contrainte_stock_min{i in PERIODE}: STOCK[i] >= 1500;
+
+# l'entrepôt doit toujours produire au moins la moitié de sa capacité de production
+s.t. contrainte_production_min{i in PERIODE}: PRODUCTION[i] >= CAPACITE[i] / 2;
+
+# le total du stock et de la production doit toujours être supérieur ou égal à la demande
+s.t. contrainte_demande_satisfaite{i in PERIODE}: PRODUCTION[i] + STOCK[i] >= DEMANDE[i];
+
+#
+s.t. cBUG{i in PERIODE}: STOCK[i] = PRODUCTION[i] - DEMANDE[i];
+
+################################################################################
+
+solve;
+display {i in PERIODE}: PRODUCTION[i], STOCK[i];
+
+################################################################################
+
+data;
+
+set PERIODE := janvier fevrier mars avril mai juin;
+
+param COUT :=		janvier 240
+					fevrier 250
+					mars	265
+					avril	285
+					mai		280
+					juin	285;
+					
+param DEMANDE :=	janvier	1000
+					fevrier	4500
+					mars	6000
+					avril	5500
+					mai		3500
+					juin	4000;
+
+param CAPACITE :=	janvier	4000
+					fevrier	3500
+					mars	4000
+					avril	4500
+					mai		4000
+					juin	3500;
+
+end;

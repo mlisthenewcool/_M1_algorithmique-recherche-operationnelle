@@ -1,0 +1,61 @@
+################################################################################
+
+set REGIONS;
+set MINOTERIES;
+
+# production des régions
+param TONNES{i in REGIONS};
+
+# quantité minimale à acheminer vers les minoteries
+param DEMANDES{i in MINOTERIES};
+
+# distance entre les régions et les minoteries
+param DISTANCES{i in REGIONS, j in MINOTERIES};
+
+# quantité transportée entre les régions nourricières et les minoteries
+var QUANTITES{i in REGIONS, j in MINOTERIES} >= 0;
+
+################################################################################
+
+# minimiser le coût d'export du blé depuis
+# les régions productrices vers les minoteries
+
+minimize obj :
+	0.1 * sum{i in REGIONS, j in MINOTERIES} QUANTITES[i,j] * DISTANCES[i,j];
+
+################################################################################
+
+# une région ne peut pas exporter plus que sa récolte
+s.t. c1{i in REGIONS}: sum{j in MINOTERIES} QUANTITES[i,j] <= TONNES[i];
+
+# la minoterie/meunerie reçoit au minimum le tonnage souhaité
+s.t. c2{j in MINOTERIES}: sum{i in REGIONS} QUANTITES[i,j] >= DEMANDES[j];
+
+# une exportation ne peut pas être négative
+s.t. c3: sum{i in REGIONS, j in MINOTERIES} QUANTITES[i,j] >= 0;
+
+################################################################################
+
+solve;
+display {i in REGIONS, j in MINOTERIES} QUANTITES[i,j];
+
+################################################################################
+
+data;
+set REGIONS := R1 R2 R3;
+set MINOTERIES := M1 M2 M3;
+param TONNES :=
+	R1 275
+	R2 400
+	R3 300;
+param DEMANDES :=
+	M1 200
+	M2 550
+	M3 225;
+param DISTANCES :
+		M1	M2	M3  :=
+	R1	210	500	400
+	R2	350	300	220
+	R3	550	200	250;
+
+end;
